@@ -1,0 +1,121 @@
+#draw phylogenetic tree for complete datasets
+library(treeio)
+library(ggtree)
+library(ggtreeExtra)
+library(ggstar)
+library(TDbook)
+library(ggplot2)
+setwd("H:/R_path/R_transcontinental/Restart/")
+tree <- read.tree("Yangteng109species.tre")
+tree
+x <- as_tibble(tree)
+write.table(x,file="tree.tibble.txt",quote=F,sep="\t")
+trait=read.table("tree.tibble.txt",header = T)
+y <- full_join(x,trait,by="label")
+y
+as.treedata(y)
+
+p <- ggtree(tree, layout="fan", open.angle=3, size=0.8)
+p
+
+p2 <- p + 
+  geom_fruit(
+    data=trait,
+    geom=geom_star,
+    mapping=aes(y=label, fill=continent, size=number, starshape=mycor),
+    position="identity",
+    starstroke=0.2
+  ) + 
+  scale_size_continuous(
+    range=c(1, 10), # the range of size.
+    guide=guide_legend(
+      keywidth=0.5, 
+      keyheight=0.5,
+      override.aes=list(starshape=15),
+      order=5
+    )
+  ) +
+  scale_fill_manual(
+    values=c("red", "blue"),
+    guide=guide_legend(
+      keywidth=0.5, 
+      keyheight=0.5,
+      override.aes=list(starshape=15,size=6), # just for legend size
+      order=5
+    )
+  ) + 
+  scale_starshape_manual(
+    values=c(15,13,1,11,16),
+    guide=guide_legend(
+      keywidth=0.5,
+      keyheight=0.5,
+      order=1,size=2,
+      override.aes=list(size=6)# just for legend size
+    )
+  )+geom_tiplab(aes(label=label),offset = 10)+xlim(NA,400)
+p2
+
+#Extract 63 species from 109 species tree, and draw phylogenetic tree for disjunct datasets
+tree <- read.tree("Yangteng109species.tre")
+Ntip(tree)
+
+plcomm=read.table("plcomm.txt",header = T)
+sample=read.table("494sample.txt")
+print(sample$V1)
+library(dplyr)
+plcomm494 <- filter(plcomm, ID %in% sample$V1)
+plcomm494=as.matrix(plcomm494)
+write.table(plcomm494,file="test.txt",quote = F, sep = "\t") 
+plcomm=read.table("plcomm494.txt",header = T)
+library(picante)
+prunedphy <- prune.sample(plcomm, tree)
+Ntip(prunedphy)
+write.tree(prunedphy, file = "pruned_tree63.tre")
+
+tree <- read.tree("pruned_tree63.tre") 
+tree
+x <- as_tibble(tree)
+trait=read.table("tree.tibble63.txt",header = T)
+y <- full_join(x,trait,by="label")
+y
+as.treedata(y)
+
+p <- ggtree(tree, layout="fan", open.angle=6, size=0.8)
+p
+
+p2 <- p + 
+  geom_fruit(
+    data=trait,
+    geom=geom_star,
+    mapping=aes(y=label, fill=continent, size=number, starshape=mycor),
+    position="identity",
+    starstroke=0.2
+  ) + 
+  scale_size_continuous(
+    range=c(2, 12), # the range of size.
+    guide=guide_legend(
+      keywidth=0.5, 
+      keyheight=0.5,
+      override.aes=list(starshape=15),
+      order=5
+    )
+  ) +
+  scale_fill_manual(
+    values=c("red", "blue"),
+    guide=guide_legend(
+      keywidth=0.5, 
+      keyheight=0.5,
+      override.aes=list(starshape=15,size=6), # just for legend size
+      order=5
+    )
+  ) + 
+  scale_starshape_manual(
+    values=c(15,13,1,11),
+    guide=guide_legend(
+      keywidth=0.5,
+      keyheight=0.5,
+      order=1,size=2,
+      override.aes=list(size=6)# just for legend size
+    )
+  )+geom_tiplab(aes(label=label),offset = 10)+xlim(NA,180)
+p2
