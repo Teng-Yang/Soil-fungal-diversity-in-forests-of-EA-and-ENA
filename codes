@@ -1,0 +1,48 @@
+# R codes for the manuscript "Environmental heterogeneity shapes higher soil fungal diversity in forests of eastern Asia compared to eastern North America"
+### H1:Diversity differences
+library(reshape2)
+library(ggplot2)
+library(ggpubr)
+library(ggtree)
+library(gridExtra)
+library(RColorBrewer)
+theme_set(theme_classic()) #Define a default theme for ggplot graphics
+setwd("H:/R_path/R_transcontinental/Restart/1H/")
+alpha=read.table("alpha1.txt",header=T)
+plot1=ggviolin(alpha, x = "continent", y = "Richness", fill = "continent",#new
+               palette = c("red", "blue"),
+               add = "boxplot", add.params = list(fill = "white"))+xlab(NULL)+ 
+  stat_compare_means(
+    aes(label = paste0("p = ", after_stat(p.format)))
+  )
+alpha=read.table("alpha3.txt",header=T)
+plot2=ggviolin(alpha, x = "continent", y = "Richness", fill = "continent",#new
+         palette = c("red", "blue"),
+         add = "boxplot", add.params = list(fill = "white"))+xlab(NULL)+ 
+  stat_compare_means(
+    aes(label = paste0("p = ", after_stat(p.format)))
+  )
+alpha=read.table("alpha5.txt",header=T)
+plot3=ggviolin(alpha, x = "continent", y = "Richness", fill = "continent",#new
+               palette = c("red", "blue"),
+               add = "boxplot", add.params = list(fill = "white"))+xlab(NULL)+ 
+  stat_compare_means(
+    aes(label = paste0("p = ", after_stat(p.format)))
+  )
+alpha=read.table("alpha2.txt",header=T)
+plot4=ggviolin(alpha, x = "continent", y = "PD", fill = "continent",#new
+               palette = c("red", "blue"),
+               add = "boxplot", add.params = list(fill = "white"))+xlab(NULL)+ 
+  stat_compare_means(
+    aes(label = paste0("p = ", after_stat(p.format)))
+  )
+alpha=read.table("alpha4.txt",header=T)
+plot5=ggviolin(alpha, x = "continent", y = "PD", fill = "continent",#new
+               palette = c("red", "blue"),
+               add = "boxplot", add.params = list(fill = "white"))+xlab(NULL)+ 
+  stat_compare_means(
+    aes(label = paste0("p = ", after_stat(p.format)))
+  )
+
+grid.arrange(plot1,plot2,plot3,plot4,plot5,nrow=2,ncol=3)
+
