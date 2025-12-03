@@ -1,5 +1,5 @@
 # R codes for the manuscript "Environmental heterogeneity shapes higher soil fungal diversity in forests of eastern Asia compared to eastern North America"
-### H1:Diversity differences
+### H1:Diversity differences between EA and ENA
 library(reshape2)
 library(ggplot2)
 library(ggpubr)
@@ -43,6 +43,230 @@ plot5=ggviolin(alpha, x = "continent", y = "PD", fill = "continent",#new
   stat_compare_means(
     aes(label = paste0("p = ", after_stat(p.format)))
   )
-
 grid.arrange(plot1,plot2,plot3,plot4,plot5,nrow=2,ncol=3)
 
+###Diversity difference among plant genus
+library(dplyr)
+library(ggplot2)
+library(rstatix)
+setwd("H:/R_path/R_transcontinental/Restart/diversity.compare.fig/")
+data1=read.table("data1.txt",header = T)
+head(data1)
+res.kruskal <- data1 %>% kruskal_test(richness ~ genus)
+data1 %>% kruskal_effsize(richness ~ genus)
+data1 %>% filter(continent == "EA") %>% kruskal_test(richness ~ genus)
+data1 %>% filter(continent == "ENA") %>% kruskal_test(richness ~ genus)
+
+data2=read.table("data2.txt",header = T)
+head(data2)
+res.kruskal <- data2 %>% kruskal_test(PD ~ genus)
+data2 %>% kruskal_effsize(PD ~ genus)
+data2 %>% filter(continent == "EA") %>% kruskal_test(PD ~ genus)
+data2 %>% filter(continent == "ENA") %>% kruskal_test(PD ~ genus)
+
+# Read data
+data1 <- read.table("data1.txt", header = TRUE)
+# Pairwise Wilcoxon tests (BH correction) — export this table
+pairwise_rich <- data1 %>%
+  pairwise_wilcox_test(richness ~ genus, p.adjust.method = "BH")
+# Save table for manual annotation
+write.table(pairwise_rich, "pairwise_richness_results.txt", sep = "\t", row.names = FALSE)
+# Clean raincloud-style plot: boxplot + jitter (NO significance lines)
+p_rich <- ggplot(data1, aes(x = genus, y = richness, fill = genus)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6, width = 0.55) +
+  geom_jitter(aes(color = genus),
+              width = 0.15, size = 1.4, alpha = 0.7, show.legend = FALSE) +
+  labs(x = "Genus", y = "Fungal richness") +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+# Read data
+data2 <- read.table("data2.txt", header = TRUE)
+# Pairwise Wilcoxon tests — export this table
+pairwise_PD <- data2 %>%
+  pairwise_wilcox_test(PD ~ genus, p.adjust.method = "BH")
+write.table(pairwise_PD, "pairwise_PD_results.txt", sep = "\t", row.names = FALSE)
+# Clean raincloud-style plot
+p_PD <- ggplot(data2, aes(x = genus, y = PD, fill = genus)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6, width = 0.55) +
+  geom_jitter(aes(color = genus),
+              width = 0.15, size = 1.4, alpha = 0.7, show.legend = FALSE) +
+  labs(x = "Genus", y = "Fungal PD") +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+grid.arrange(p_rich,p_PD,nrow=1,ncol=2)
+
+###Fungal diversity comparison between EA and ENA across the disjunct plant phylogenetic tree
+library(ape)
+setwd("H:/R_path/R_transcontinental/Restart/diversity.compare.fig/")
+phy=read.tree("pruned_tree63.genus.ultrametric.tre")
+plot(phy)
+Ntip(phy)
+plot.phylo(phy)# draw a phylogenetic tree with scale bar
+axisPhylo()#
+
+data1=read.table("data1.txt",header = T)
+head(data1)
+# Load necessary library
+library(dplyr)
+# Count the number of observations for each genus in each continent (EA and ENA)
+count_data <- data1 %>%
+  filter(continent %in% c("EA", "ENA")) %>%
+  group_by(continent, genus) %>%
+  summarise(count = n())
+# View the result
+print(count_data,n=24)
+# Perform the Wilcoxon test for each genus
+wilcoxon_results <- data1 %>%
+  filter(continent %in% c("EA", "ENA")) %>%
+  group_by(genus) %>%
+  summarise(
+    wilcox_test = list(wilcox.test(richness ~ continent,exact=FALSE)),
+    p_value = wilcox_test[[1]]$p.value  # Extract p-value from the test result
+  )
+# View the results
+print(wilcoxon_results)
+# Calculate the mean richness for each genus and continent (EA and ENA)
+mean_richness <- data1 %>%
+  filter(continent %in% c("EA", "ENA")) %>%
+  group_by(genus, continent) %>%
+  summarise(mean_richness = mean(richness, na.rm = TRUE))
+# View the result
+print(mean_richness,n=22)
+
+data2=read.table("data2.txt",header = T)
+head(data2)
+# Count the number of observations for each genus in each continent (EA and ENA)
+count_data <- data2 %>%
+  filter(continent %in% c("EA", "ENA")) %>%
+  group_by(continent, genus) %>%
+  summarise(count = n())
+# View the result
+print(count_data,n=24)
+# Calculate the mean richness for each genus and continent (EA and ENA)
+mean_PD <- data2 %>%
+  filter(continent %in% c("EA", "ENA")) %>%
+  group_by(genus, continent) %>%
+  summarise(mean_PD = mean(PD, na.rm = TRUE))
+# View the result
+print(mean_PD,n=22)
+# Perform the Wilcoxon test for each genus
+wilcoxon_results <- data2 %>%
+  filter(continent %in% c("EA", "ENA")) %>%
+  group_by(genus) %>%
+  summarise(
+    wilcox_test = list(wilcox.test(PD ~ continent,exact=FALSE)),
+    p_value = wilcox_test[[1]]$p.value  # Extract p-value from the test result
+  )
+# View the results
+print(wilcoxon_results)
+
+###draw the paired bar plots
+# Calculate the mean richness, standard deviation, count, and standard error for each genus and continent
+mean_richness <- data1 %>%
+  filter(continent %in% c("EA", "ENA")) %>%
+  group_by(genus, continent) %>%
+  summarise(
+    mean_richness = mean(richness, na.rm = TRUE),
+    sd = sd(richness, na.rm = TRUE),
+    n = n(),
+    se = sd / sqrt(n),
+    .groups = 'drop'
+  )
+# Create the paired bar plot with hollow bars and error bars
+ggplot(mean_richness, aes(x = genus, y = mean_richness, color = continent, group = continent)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7, fill = NA) +
+  geom_errorbar(aes(ymin = mean_richness - se, ymax = mean_richness + se),
+                position = position_dodge(width = 0.8), width = 0.2) +
+  labs(title = "Comparison of Richness Between EA and ENA by Genus",
+       x = "Genus",
+       y = "Mean Richness") +
+  scale_color_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Calculate the mean PD, standard deviation, count, and standard error for each genus and continent
+mean_PD <- data2 %>%
+  filter(continent %in% c("EA", "ENA")) %>%
+  group_by(genus, continent) %>%
+  summarise(
+    mean_PD = mean(PD, na.rm = TRUE),
+    sd = sd(PD, na.rm = TRUE),
+    n = n(),
+    se = sd / sqrt(n),
+    .groups = "drop"
+  )
+# Create the paired bar plot with hollow bars and error bars for PD
+ggplot(mean_PD, aes(x = genus, y = mean_PD, color = continent, group = continent)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), 
+           width = 0.7, fill = NA) +
+  geom_errorbar(aes(ymin = mean_PD - se, ymax = mean_PD + se),
+                position = position_dodge(width = 0.8), width = 0.2) +
+  labs(title = "Comparison of Phylogenetic Diversity (PD) Between EA and ENA by Genus",
+       x = "Genus",
+       y = "Mean PD") +
+  scale_color_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+###relate tree fig with other statistical fig
+set.seed(2019-10-13)
+tr<- rtree(10)
+d1<-data.frame(label=c(tr$tip.label[sample(5,5)],"A"),value=sample(1:6,6))
+d2<-data.frame(label=rep(tr$tip.label,5),category=rep(LETTERS[1:5],each=10),value=rnorm(50,0,3))
+g<-ggtree(tr)+geom_tiplab(align = TRUE)
+p1<-ggplot(d1,aes(label,value))+geom_col(aes(fill=label))+geom_text(aes(label = label,y=value+.1))+coord_flip()+theme_tree2()+theme(legend.position = "none")
+p2<-ggplot(d2,aes(x=category,y=label))+geom_tile(aes(fill=value))+scale_fill_viridis_c()+theme_minimal()+xlab(NULL)+ylab(NULL)
+cowplot::plot_grid(g,p2,p1,ncol=3)
+library(aplot)
+p2%>%insert_left(g)%>%insert_right(p1,width = .5)
+
+#imitate
+tree <- read.tree("pruned_tree63.genus.ultrametric.tre") #开始画图
+tree
+
+pp<-ape::rotateConstr(tree,c("Fagus","Castanea","Carpinus","Acer","Aesculus","Liquidambar","Fraxinus","Lyonia","Cornus","Sassafras","Magnolia"))
+p <- ggtree(pp,ladderize=FALSE)+geom_tiplab(align = TRUE)+theme_tree2()
+p <- ggtree(tree)+geom_tiplab(align = TRUE)+theme_tree2()
+p
+p1 <- p + xlim(0,180)
+p1
+
+mean_richness <- mean_richness %>% 
+  mutate(label = genus)  # Create a new column called label
+a1 <- ggplot(mean_richness, aes(x = label, y = mean_richness, color = continent, group = continent)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7, fill = NA) +
+  geom_errorbar(aes(ymin = mean_richness - se, ymax = mean_richness + se),
+                position = position_dodge(width = 0.8), width = 0.2) +
+  geom_text(aes(label = label, y = mean_richness + se + 0.1),
+            position = position_dodge(width = 0.8)) +
+  coord_flip() +
+  scale_color_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  theme_tree2() +
+  theme(legend.position = "none")
+a1
+mean_PD <- mean_PD %>% 
+  mutate(label = genus)  # Create a new column called label
+a2=# Create the paired bar plot for PD
+  ggplot(mean_PD, aes(x = label, y = mean_PD, color = continent, group = continent)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7, fill = NA) +
+  geom_errorbar(aes(ymin = mean_PD - se, ymax = mean_PD + se),
+                position = position_dodge(width = 0.8), width = 0.2) +
+  geom_text(aes(label = label, y = mean_PD + se + 0.1),
+            position = position_dodge(width = 0.8)) +
+  coord_flip() +
+  scale_color_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  theme_tree2() +
+  theme(legend.position = "none")
+a2
+a1%>%insert_left(p1)%>%insert_right(a2,width = .5)
+
+library(ggimage)
+imgdir <- "H:/R_path/R_transcontinental/Restart/diversity.compare.fig/trees/"
+p1+geom_tiplab(aes(image=paste0(imgdir,"/",label,".jpg")),geom="image",offset=40,align=2,size=.12)+
+  geom_tiplab(geom="label",offset=30,hjust = .5)
