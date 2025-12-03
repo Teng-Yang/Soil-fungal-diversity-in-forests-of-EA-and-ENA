@@ -1,0 +1,396 @@
+### OLS multiple regression models for H2 and H3
+###Data1: Alpha diversity drivers across EA and ENA
+library(MASS)
+library(car)
+library(adespatial)
+setwd("H:/R_path/R_transcontinental/Restart/1H/")
+data=read.table("alpha1.txt",header=T)
+names(data) 
+data=scale(data,center=T,scale=T)    #centralization and standardization
+data=as.matrix(data)  
+write.table(data,file="test.txt",quote = F, sep = "\t") 
+data=read.table("test.txt",header=T)
+driv=forward.sel(data[,1],data[,c(2:41)],nperm=999, alpha = 0.05)
+model1=lm(Richness~BIO15 + AI + twi + roughness + PPD + elevation 
+          ,data=data)
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+vif(lm(Richness~  BIO15 + AI + twi + roughness + PPD + elevation,data=data))  #vif<10
+
+###Data2: Alpha diversity drivers across EA and ENA
+data=read.table("alpha2.txt",header=T)
+names(data) 
+data=scale(data,center=T,scale=T)    #centralization and standardization
+data=as.matrix(data)  
+write.table(data,file="test.txt",quote = F, sep = "\t") 
+data=read.table("test.txt",header=T)
+driv=forward.sel(data[,1],data[,c(2:41)],nperm=999, alpha = 0.05)
+model1=lm(PD~ EVI + pH + AI + PPD + SLA + LPC + CF + BD + SNC + BIO1 + Fagu + Lyon + PSR + BIO15,data=data)
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+model2 <- lm(PD ~ PPD + LPC + CF + BD + SNC + BIO1 + Fagu + Lyon + PSR + BIO15, data = data)
+model2.stepAIC=stepAIC(model2,direction=c("both"))
+summary(model2.stepAIC)
+model3 <- lm(PD ~ PPD + LPC + CF + BD + SNC + BIO1 + Fagu + Lyon + BIO15, data = data)
+model3.stepAIC=stepAIC(model2,direction=c("both"))
+summary(model3.stepAIC)
+vif(lm(PD~ PPD + LPC + CF + BD + SNC + BIO1 + Fagu + Lyon + BIO15,data=data))  #vif<5
+# Define the list of predictors excluding PSR
+predictors <- c("PPD", "LPC", "CF", "BD", "SNC", "BIO1", "Fagu", "Lyon", "BIO15")
+# Run forward selection
+driv <- forward.sel(data[,1], data[,predictors], nperm = 999, alpha = 0.05)
+
+###Validation based on alpha 3 and 4
+library(MASS)
+library(car)
+library(adespatial)
+setwd("H:/R_path/R_transcontinental/Restart/1H/")
+data=read.table("alpha3.txt",header=T)
+names(data) 
+data=scale(data,center=T,scale=T)    #centralization and standardization
+data=as.matrix(data)  
+write.table(data,file="test.txt",quote = F, sep = "\t") 
+data=read.table("test.txt",header=T)
+driv=forward.sel(data[,1],data[,c(2:39)],nperm=999, alpha = 0.05)
+model1=lm(Richness~pH + BIO12 + BIO15 + twi + EVI + elevation + AI + LNC + SNC + roughness + clay + DBH + Fagu + Magn 
+          ,data=data)
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+model2=lm(Richness~  BIO15 + twi + EVI + elevation + AI + LNC + SNC + roughness + clay + DBH + Fagu + Magn  
+          ,data=data)
+model2.stepAIC=stepAIC(model2,direction=c("both"))
+summary(model2.stepAIC)
+driv = forward.sel(data[,1], data[,c("BIO15", "twi", "EVI", "elevation", "AI", "LNC", "SNC", "roughness", "clay", "DBH", "Fagu", "Magn")], nperm=999, alpha=0.05)
+vif(lm(Richness ~ BIO15 + twi + EVI + elevation + AI + LNC + SNC + roughness + clay + DBH + Fagu + Magn ,data=data))  #vif<10
+
+data=read.table("alpha4.txt",header=T)
+names(data) 
+data=scale(data,center=T,scale=T)    #centralization and standardization
+data=as.matrix(data)  
+write.table(data,file="test.txt",quote = F, sep = "\t") 
+data=read.table("test.txt",header=T)
+driv=forward.sel(data[,1],data[,c(2:38)],nperm=999, alpha = 0.05)
+model1=lm(PD~ EVI + silt + BD + SNC + WS + SOC + SR + Lyon + Fagu + BIO1 + BIO15 + CF + PPD + PSR + BIO4 
+          ,data=data)
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+model2=lm(PD~ silt + BD + SNC + SR + Lyon + Fagu + BIO1 + BIO15 + CF + PPD + PSR + BIO4  
+          ,data=data)
+model2.stepAIC=stepAIC(model2,direction=c("both"))
+summary(model2.stepAIC)
+
+model3=lm(PD~ silt + BD + SNC + Lyon + Fagu + CF + PPD  + BIO4  
+          ,data=data)
+model3.stepAIC=stepAIC(model3,direction=c("both"))
+summary(model3.stepAIC)
+driv = forward.sel(data[,1], data[,c("silt", "BD", "SNC", "Lyon", "Fagu", "CF", "PPD", "BIO4")], nperm=999, alpha=0.05)
+vif(lm(PD~ silt + BD + SNC + Lyon + Fagu + CF + PPD  + BIO4    ,data=data))  #vif<5
+
+###partial effects of main drivers
+library(ggeffects)
+setwd("H:/R_path/R_transcontinental/Restart/1H/")
+data=read.table("alpha1.txt",header=T)
+model1=lm(Richness~BIO15 + AI + twi + roughness + PPD + elevation
+          ,data=data) 
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+mydf <- ggpredict(model1, terms = c("BIO15"))
+a1=ggplot(mydf, aes(x, predicted)) + ylab("Predicted fungal richness")+xlab("Precipitation seasonality (mm)")+
+  geom_line(color="#8B6BBE",linewidth=1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1)+
+  theme(
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12)   
+  )
+mydf <- ggpredict(model1, terms = c("AI"))
+a2=ggplot(mydf, aes(x, predicted)) + ylab("Predicted fungal richness")+xlab("Aridity index")+
+  geom_line(color="#8B6BBE",linewidth=1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1)+
+  theme(
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12)  
+  )
+
+data=read.table("alpha2.txt",header=T)
+model1=lm(PD ~ PPD + LPC + CF + BD + SNC + BIO1 + Fagu + Lyon + BIO15
+          ,data=data) 
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+mydf <- ggpredict(model1, terms = c("CF"))
+b1=ggplot(mydf, aes(x, predicted)) + ylab("Predicted fungal PD")+xlab("Coarse fragments (cm3/dm3)")+
+  geom_line(color="#8B6BBE",linewidth=1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1)+
+  theme(
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12)  
+  )
+mydf <- ggpredict(model1, terms = c("BD"))
+b2=ggplot(mydf, aes(x, predicted)) + ylab("Predicted fungal PD")+xlab("Bulk density (cg/cm3)")+
+  geom_line(color="#8B6BBE",linewidth=1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1)+
+  theme(
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12)   
+  )
+
+data=read.table("alpha3.txt",header=T)
+model1=lm(Richness ~ BIO15 + twi + EVI + elevation + AI + LNC + SNC + roughness + clay + DBH + Fagu + Magn
+          ,data=data) 
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+mydf <- ggpredict(model1, terms = c("BIO15"))
+c1=ggplot(mydf, aes(x, predicted)) + ylab("Predicted fungal richness")+xlab("Precipitation seasonality (mm)")+
+  geom_line(color="#8B6BBE",linewidth=1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1)+
+  theme(
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12)  
+  )
+mydf <- ggpredict(model1, terms = c("AI"))
+c2=ggplot(mydf, aes(x, predicted)) + ylab("Predicted fungal richness")+xlab("Aridity index")+
+  geom_line(color="#8B6BBE",linewidth=1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1)+
+  theme(
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12)   
+  )
+
+data=read.table("alpha4.txt",header=T)
+model1=lm(PD~ silt + BD + SNC + Lyon + Fagu + CF + PPD  + BIO4
+          ,data=data) 
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+mydf <- ggpredict(model1, terms = c("CF"))
+d1=ggplot(mydf, aes(x, predicted)) + ylab("Predicted fungal PD")+xlab("Coarse fragments (cm3/dm3)")+
+  geom_line(color="#8B6BBE",linewidth=1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1)+
+  theme(
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12)   
+  )
+mydf <- ggpredict(model1, terms = c("BD"))
+d2=ggplot(mydf, aes(x, predicted)) + ylab("Predicted fungal PD")+xlab("Bulk density (cg/cm3)")+
+  geom_line(color="#8B6BBE",linewidth=1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.1)+
+  theme(
+    axis.title.x = element_text(size = 12),   
+    axis.title.y = element_text(size = 12)    
+  )
+grid.arrange(a1,a2,b1,b2,c1,c2,d1,d2,nrow=1,ncol=8)
+
+###summary of multiple OLS regression models_update
+library(ggpubr)
+library(ggsci)
+sum=read.table("summary_plot_update.txt",header = T)
+head(sum)
+sum$Category = factor(sum$Category,
+                      levels=c("Environmental_factors", "Plant_individual_traits","Plant_diversity_traits"))
+levels(sum$Category)
+donut_faceted <- ggdonutchart(sum,
+                              "Proportion",         # The numeric variable that determines the slice sizes
+                              label = "Category",     # Label for each slice, here using the Category column
+                              fill = "Category",      # Use Category for the fill colors
+                              labeller = label_wrap_gen(15),   # Wraps long category names (adjust width as needed)
+                              hole = 0.5, color = "white", size = 1            # Controls the size of the donut hole (0.5 means 50% of the radius is empty)
+) +scale_fill_simpsons()+
+  facet_wrap(~ Group, nrow=1)  # This splits the plot into one chart per dataset (Group)
+donut_faceted <- ggdonutchart(sum,
+                              "Proportion",
+                              label = "Category",
+                              fill = "Category",
+                              labeller = label_wrap_gen(15),
+                              hole = 0.5, color = "white", size = 1
+) +
+  scale_fill_manual(
+    values = c(
+      "Environmental_factors" = "#8B6BBE",  
+      "Plant_individual_traits" = "#7B9E87",
+      "Plant_diversity_traits" = "#F2B134"
+    )
+  ) +
+  facet_wrap(~ Group, nrow = 1)
+print(donut_faceted)
+
+###Bivariate analysis gam and lm
+# Load necessary packages
+library(ggplot2)
+library(ggpubr)  # For theme_pubr()
+library(mgcv)    # For GAM fitting
+library(ggrain)
+library(cowplot)
+data1=read.table("alpha1_continent.txt",header=T)
+names(data1)
+# Convert the continent variable into a factor and relabel the categories: 0 → ENA, 1 → EA.
+data1$continent <- factor(data1$continent, levels = c(0, 1), labels = c("ENA", "EA"))
+
+# Create the plot
+BIO15_range <- range(data1$BIO15, na.rm = TRUE)
+
+p1 <- ggplot(data1, aes(x = BIO15, y = Richness)) +
+  # Plot points with colors based on continent values
+  geom_point(aes(color = continent), size = 2,alpha=0.6) +
+  # Overlay the linear model fit with a yellow line
+  stat_smooth(method = "lm", se = TRUE, color = "#4E79A7", linewidth = 1.2) +
+  # Manually specify the colors for the points
+  scale_color_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  # Add labels and title
+  labs(x = "Precipitation seasonality (mm)", y = "Fungal richness") +
+  # Use a clean publication-ready theme
+  theme_pubr()
+p1 <- p1 + xlim(BIO15_range)
+
+g1 <- ggplot(data1, aes(continent, BIO15, fill = continent)) +
+  geom_rain(alpha = 0.8, size = 0.8) +
+  scale_fill_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  geom_signif(
+    comparisons = list(c("EA", "ENA")),
+    test = "wilcox.test",
+    map_signif_level = TRUE,
+    textsize = 5,  
+    y_position = max(data1$BIO15) * 0.9  
+  ) +
+  labs(x = NA, y = "Precipitation seasonality (mm)") +
+  theme_pubr() +
+  theme(
+    axis.title.y = element_blank(),  
+    legend.position = "none"         
+  )+ coord_flip()
+g1 <- g1 + ylim(BIO15_range)
+
+combined_plot1=plot_grid(g1, p1, ncol = 1, align = "v")
+
+# Create the plot
+rough_range <- range(data1$roughness, na.rm = TRUE)
+
+p2 <- ggplot(data1, aes(x = roughness, y = Richness)) +
+  # Plot points with colors based on continent values
+  geom_point(aes(color = continent), size = 2,alpha=0.6) +
+  # Overlay the linear model fit with a yellow line
+  stat_smooth(method = "lm", se = TRUE, color = "#4E79A7", linewidth = 1.2) +
+  # Manually specify the colors for the points
+  scale_color_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  # Add labels and title
+  labs(x = "Roughness (m)", y = "Fungal richness") +
+  # Use a clean publication-ready theme
+  theme_pubr()
+p2 <- p2 + xlim(rough_range)
+
+g2 <- ggplot(data1, aes(continent, roughness, fill = continent)) +
+  geom_rain(alpha = 0.8, size = 0.8) +
+  scale_fill_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  geom_signif(
+    comparisons = list(c("EA", "ENA")),
+    test = "wilcox.test",
+    map_signif_level = TRUE,
+    textsize = 5,  
+    y_position = max(data1$roughness) * 0.9  
+  ) +
+  labs(x = NA, y = "Roughness (m)") +
+  theme_pubr() +
+  theme(
+    axis.title.y = element_blank(),  
+    legend.position = "none"         
+  )+ coord_flip()
+g2 <- g2 + ylim(rough_range)
+
+combined_plot2=plot_grid(g2, p2, ncol = 1, align = "v")
+
+data2=read.table("alpha2_continent.txt",header=T)
+names(data2)
+# Convert the continent variable into a factor and relabel the categories: 0 → ENA, 1 → EA.
+data2$continent <- factor(data2$continent, levels = c(0, 1), labels = c("ENA", "EA"))
+
+## Create the plot
+CF_range <- range(data1$CF, na.rm = TRUE)
+
+p3 <- ggplot(data2, aes(x = CF, y = PD)) +
+  # Plot points with colors based on continent values
+  geom_point(aes(color = continent), size = 2, alpha = 0.6) +
+  # Overlay the linear model fit with a yellow line
+  stat_smooth(method = "lm", se = TRUE, color = "#F28E2B", linewidth = 1.2) +
+  # Manually specify the colors for the points
+  scale_color_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  # Add labels and title
+  labs(x = "Coarse fragments (cm3/dm3)", y = "Fungal PD") +
+  # Use a clean publication-ready theme
+  theme_pubr()
+p3 <- p3 + xlim(CF_range)
+
+g3 <- ggplot(data2, aes(continent, CF, fill = continent)) +
+  geom_rain(alpha = 0.8, size = 0.8) +
+  scale_fill_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  geom_signif(
+    comparisons = list(c("EA", "ENA")),
+    test = "wilcox.test",
+    map_signif_level = TRUE,
+    textsize = 5,  # 星号大小
+    y_position = max(data2$CF) * 0.9  
+  ) +
+  labs(x = NA, y = "Coarse fragments (cm3/dm3)") +
+  theme_pubr() +
+  theme(
+    axis.title.y = element_blank(),  
+    legend.position = "none"        
+  ) + coord_flip()
+g3 <- g3 + ylim(CF_range)
+
+combined_plot3=plot_grid(g3, p3, ncol = 1, align = "v")
+
+## Create the plot
+BD_range <- range(data1$BD, na.rm = TRUE)
+
+p4 <- ggplot(data2, aes(x = BD, y = PD)) +
+  # Plot points with colors based on continent values
+  geom_point(aes(color = continent), size = 2, alpha = 0.6) +
+  # Overlay the linear model fit with a yellow line
+  stat_smooth(method = "lm", se = TRUE, color = "#F28E2B", linewidth = 1.2) +
+  # Manually specify the colors for the points
+  scale_color_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  # Add labels and title
+  labs(x = "Bulk density (cg/cm3)", y = "Fungal PD") +
+  # Use a clean publication-ready theme
+  theme_pubr()
+p4 <- p4 + xlim(BD_range)
+
+g4 <- ggplot(data2, aes(continent, BD, fill = continent)) +
+  geom_rain(alpha = 0.8, size = 0.8) +
+  scale_fill_manual(values = c("EA" = "red", "ENA" = "blue")) +
+  geom_signif(
+    comparisons = list(c("EA", "ENA")),
+    test = "wilcox.test",
+    map_signif_level = TRUE,
+    textsize = 5,  # 星号大小
+    y_position = max(data2$BD) * 0.9  
+  ) +
+  labs(x = NA, y = "Bulk density (cg/cm3)") +
+  theme_pubr() +
+  theme(
+    axis.title.y = element_blank(),  
+    legend.position = "none"         
+  ) + coord_flip()
+g4 <- g4 + ylim(BD_range)
+
+combined_plot4=plot_grid(g4, p4, ncol = 1, align = "v")
+dev.new()
+grid.arrange(combined_plot1,combined_plot2,combined_plot3,combined_plot4,ncol=4)
+
+#statistics
+data=read.table("alpha1.txt",header=T)
+model1=lm(Richness~BIO15
+          ,data=data)
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+model1=lm(Richness~roughness
+          ,data=data)
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+
+data=read.table("alpha2.txt",header=T)
+model1=lm(PD~CF
+          ,data=data)
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
+model1=lm(PD~BD
+          ,data=data)
+model1.stepAIC=stepAIC(model1,direction=c("both"))
+summary(model1.stepAIC)
