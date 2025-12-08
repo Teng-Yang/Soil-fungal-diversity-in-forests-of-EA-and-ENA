@@ -1,12 +1,12 @@
-Supporting R Code for the Manuscript
+# Supporting R Code for the Manuscript
 
-“Environmental heterogeneity shapes higher soil fungal diversity in forests of eastern Asia compared to eastern North America”
+***“Environmental heterogeneity shapes higher soil fungal diversity in forests of eastern Asia compared to eastern North America”***
 
 This repository contains three R scripts that support the analyses presented in **Yang et al.** The scripts cover data processing, plant phylogenetic tree construction, and hypothesis testing related to soil fungal diversity across Eastern Asia (EA) and Eastern North America (ENA).
 
 ---
 
-📁 Repository Contents
+## 📁 Repository Contents
 
 ---
 
@@ -30,7 +30,7 @@ Test Hypothesis 1 (H1):
 
 #### **2.1 Purpose**
 
-Test Hypotheses 2 and 3:
+Test Hypotheses 2 and 3 (H2-H3):
 
 * **H2:** Fungal diversity increases significantly with plant diversity.
 * **H3:** Fungal diversity is primarily controlled by environmental rather than plant factors, with greater climatic and topographic heterogeneity promoting higher diversity in EA forests.
@@ -51,6 +51,7 @@ Construct plant phylogenetic trees to visualize the study design.
 
 #### **3.2 Key Functions**
 
-* Draw phylogenetic trees for the complete datasets
-* Draw phylogenetic trees for the disjunct datasets
+* Draw phylogenetic trees for the **complete datasets**.
+* Draw phylogenetic trees for the **disjunct datasets**.
 
+---
