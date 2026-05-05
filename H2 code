@@ -1,4 +1,4 @@
-### OLS multiple regression models for H2 and H3
+### OLS multiple regression models for H2
 ###Data1: Alpha diversity drivers across EA and ENA
 library(MASS)
 library(car)
