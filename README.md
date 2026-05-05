@@ -14,8 +14,8 @@ This repository contains three R scripts that support the analyses presented in 
 
 #### **1.1 Purpose**
 
-Test Hypothesis 1 (H1):
-**Soil fungal diversity in EA is significantly higher than that in ENA.**
+Test Hypothesis 1 (H1)-the pattern hypothesis:
+**Soil fungal taxonomic and phylogenetic diversity are greater in EA than in ENA.**
 
 #### **1.2 Key Functions**
 
@@ -26,14 +26,12 @@ Test Hypothesis 1 (H1):
 
 ---
 
-### **2. `H2-H3 code.r`**
+### **2. `H2 code.r`**
 
 #### **2.1 Purpose**
 
-Test Hypotheses 2 and 3 (H2-H3):
-
-* **H2:** Fungal diversity increases significantly with plant diversity.
-* **H3:** Fungal diversity is primarily controlled by environmental rather than plant factors, with greater climatic and topographic heterogeneity promoting higher diversity in EA forests.
+Test Hypotheses 2 (H2)-the mechanism hypothesis:
+**The intercontinental difference is explained primarily by environmental factors rather than by plant-related factors or continent per se, with greater climatic, topographic, and soil heterogeneity in EA promoting greater fungal diversity.**
 
 #### **2.2 Key Functions**
 
@@ -51,7 +49,7 @@ Construct plant phylogenetic trees to visualize the study design.
 
 #### **3.2 Key Functions**
 
-* Draw phylogenetic trees for the **complete datasets**.
-* Draw phylogenetic trees for the **disjunct datasets**.
+* Draw phylogenetic trees for the **Expanded datasets**.
+* Draw phylogenetic trees for the **Disjunct datasets**.
 
 ---
